@@ -1,60 +1,70 @@
-// // import React from 'react'
-// // import { Text, View } from 'react-native'
+import React, {useState} from 'react';
+import { Alert, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// // export default function ViewExportDataScreen(props) {
-// //     return (
-// //         <View>
-// //             <Text>Would you like to view or export your data?</Text>
-// //         </View>
-// //     )
-// // }
+import {
+    LineChart,
+    BarChart,
+    PieChart,
+    ProgressChart,
+    ContributionGraph,
+    StackedBarChart
+  } from "react-native-chart-kit";
 
-// import React, { useState } from 'react';
-// import { Button, View, Text } from 'react-native';
-// import RNFS from 'react-native-fs';
-// import Email from 'react-native-email';
+  export default function ViewExportDataScreen({navigation}) {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
 
-// const EmailData = () => {
-//   const [filePath, setFilePath] = useState(null);
+    const onFooterLinkPress = () => {
+        navigation.navigate('Home')
+    }
 
-//   const createDataFile = () => {
-//     const data = JSON.stringify({
-//       data1: 'Example Data 1',
-//       data2: 'Example Data 2',
-//     });
-//     const path = RNFS.DocumentDirectoryPath + '/data.json';
-//     RNFS.writeFile(path, data, 'utf8')
-//       .then(() => {
-//         setFilePath(path);
-//       });
-//   };
 
-//   const sendEmail = () => {
-//     const to = '';
-//     const subject = 'Data File';
-//     const body = 'Please find the attached data file.';
-//     const attachment = [{
-//       path: filePath,
-//       type: 'application/json',
-//       name: 'data.json',
-//     }];
-
-//     Email.default.open({
-//       to,
-//       subject,
-//       body,
-//       attachments: attachment,
-//     });
-//   };
-
-//   return (
-//     <View>
-//       <Button title="Create Data File" onPress={createDataFile} />
-//       {filePath && (
-//         <Button title="Email Data File" onPress={sendEmail} />
-//       )}
-//     </View>
-//   );
-// };
-
-// export default EmailData;
+    return (
+        <View>
+        <Text>Bezier Line Chart</Text>
+        <LineChart
+          data={{
+            labels: ["January", "February", "March", "April", "May", "June"],
+            datasets: [
+              {
+                data: [
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100
+                ]
+              }
+            ]
+          }}
+          width={400} // from react-native
+          height={320}
+          yAxisLabel="$"
+          yAxisSuffix="k"
+          yAxisInterval={1} // optional, defaults to 1
+          chartConfig={{
+            backgroundColor: "#e26a00",
+            backgroundGradientFrom: "#fb8c00",
+            backgroundGradientTo: "#ffa726",
+            decimalPlaces: 2, // optional, defaults to 2dp
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            },
+            propsForDots: {
+              r: "6",
+              strokeWidth: "2",
+              stroke: "#ffa726"
+            }
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16
+          }}
+        />
+      </View>
+    )
+}

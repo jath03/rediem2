@@ -17,7 +17,12 @@ export default StyleSheet.create({
         paddingRight: 30,
         justifyContent: 'center',
         alignItems: 'center'
-    },
+    }, 
+    separator: {
+        marginVertical: 8,
+        borderBottomColor: '#737373',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+      },
     input: {
         height: 48,
         borderRadius: 5,

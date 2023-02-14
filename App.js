@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { LoginScreen, HomeScreen, RegistrationScreen, SettingsScreen, RecordDataScreen, ConnectDeviceScreen, ViewExportDataScreen} from 'C:/Users/Andre/Desktop/rediem2/src/screens'
+import { LoginScreen, HomeScreen, RegistrationScreen, SettingsScreen, RecordDataScreen, ConnectDeviceScreen, ViewExportDataScreen} from './src/screens'
 import {decode, encode} from 'base-64'
 import { firebase } from './src/firebase/config'
 if (!global.btoa) {  global.btoa = encode }
@@ -62,6 +62,11 @@ export default function App() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Registration" component={RegistrationScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Record Data" component={RecordDataScreen} />
+            <Stack.Screen name="Connect Your Device" component={ConnectDeviceScreen} />
+            <Stack.Screen name="Stored Data" component={ViewExportDataScreen} />
           </>
         )}
       </Stack.Navigator>

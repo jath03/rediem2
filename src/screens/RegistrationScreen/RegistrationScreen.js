@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
-import { firebase } from 'C:/Users/Andre/Desktop/rediem2/src/firebase/config.js'
+import { firebase } from 'C:/Users/blake/OneDrive/Desktop/rediem2/src/firebase/config.js'
 
 export default function RegistrationScreen({navigation}) {
     const [fullName, setFullName] = useState('')
