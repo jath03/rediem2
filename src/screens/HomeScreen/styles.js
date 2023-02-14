@@ -6,7 +6,7 @@ export default StyleSheet.create({
         alignItems: 'center'
     },
     formContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         height: 80,
         marginTop: 40,
         marginBottom: 20,
