@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
-import { firebase } from 'C:/Users/blake/OneDrive/Desktop/rediem2/src/firebase/config.js'
+//import { firebase } from 'C:/Users/blake/OneDrive/Desktop/rediem2/src/firebase/config.js'
+import { firebase } from './../../firebase/config.js'
 import {useNetInfo} from "@react-native-community/netinfo";
 
 export default function LoginScreen({navigation}) {
