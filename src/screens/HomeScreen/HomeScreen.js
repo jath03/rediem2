@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FlatList, Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { FlatList, Keyboard, Text, TextInput, TouchableOpacity, View, Image } from 'react-native'
 import styles from './styles';
 import { firebase } from '../../firebase/config'
 
@@ -25,12 +25,21 @@ export default function HomeScreen({navigation}) {
 
     return (
         <View style={styles.container}>
+        <Separator />
+        <Text style={styles.title}>Welcome back, User</Text>
+        <Separator />
+        <Image source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/1200px-Default_pfp.svg.png'}}
+        style={
+            {
+            width: 400, 
+            height: 400, 
+            borderRadius: 60,
+            height: 120,
+            marginBottom: 10,
+            width: 120
+            }} />
 
-            <Text style={styles.title}>Welcome back, </Text>
-
-
-
-
+        <Separator />
 
 
 
@@ -53,6 +62,10 @@ export default function HomeScreen({navigation}) {
          <TouchableOpacity style={styles.button} onPress={() => onViewExportDataPress()}>
                     <Text style={styles.buttonTitle}>View/Export Data</Text>
          </TouchableOpacity>
+
+       
         </View>
+
+        
     )
 }
