@@ -97,27 +97,47 @@ export default function ConnectDeviceScreen(props) {
     let float_view = new Float32Array(buffer, 12, 3);
     
     let buffer_idx = 0;
-    
+    let buffer_state = 0;
+    let offset = 0;
     const handleUpdateValueForCharacteristic = (
         data: BleManagerDidUpdateValueForCharacteristicEvent,
     ) => {
         // The data doesn't necessarily come all in one packet, so we have to
         // manage this buffer filling up ourselves
-        if (buffer_idx == 0 && data.value[0] == 0x12 && data.value[1] == 0x34) {
-            for (let i = 0; i < data.value.length - 2; i++) {
-                uint8_view[i] = data.value[i + 2];
-            }
-            buffer_idx += data.value.length - 2;
-        } else if (buffer_idx > 0) {
-            for (let i = 0; i < data.value.length; i++) {
-                uint8_view[buffer_idx + i] = data.value[i];
-            }
-            if (buffer_idx + data.value.length >= 24) {
-                console.log("Revieved data: " + int16_view + "," + float_view);
+        switch (buffer_state) {
+            case 0:
+                if (data.value[0] != 0x12) {
+                    break;
+                }
+                buffer_state = 1;
+                if (data.length == 1) {
+                    break;
+                }
+                buffer_idx = 1;
+                offset = 1;
+            case 1:
+                if (data.value[buffer_idx] != 0x34) {
+                    buffer_idx = 0;
+                    break;
+                }
+                buffer_state = 2;
+                if (data.length - buffer_idx <= 0) {
+                    break;
+                }
+                offset += buffer_idx;
                 buffer_idx = 0;
-            } else {
-                buffer_idx += data.value.length;
-            }
+            case 2:
+                for (let i = offset; i < data.value.length; i++) {
+                    uint8_view[buffer_idx + i - offset] = data.value[i];
+                }
+                if (buffer_idx + data.value.length - offset >= 24) {
+                    console.log("Revieved data: " + int16_view + "," + float_view);
+                    buffer_idx = 0;
+                    buffer_state = 0;
+                } else {
+                    buffer_idx += data.value.length - offset;
+                }
+                offset = 0;
         }
     };
 
