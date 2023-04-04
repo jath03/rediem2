@@ -1,10 +1,104 @@
-import React from 'react'
-import { Text, View } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { Text, View, NativeModules, NativeEventEmitter } from 'react-native'
+
+import BleManager, {
+  BleDisconnectPeripheralEvent,
+  BleManagerDidUpdateValueForCharacteristicEvent,
+  BleScanCallbackType,
+  BleScanMatchMode,
+  BleScanMode,
+  Peripheral,
+  ScanSettings
+} from 'react-native-ble-manager';
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 export default function RecordDataScreen(props) {
+    const [data, setData] = useState(new Array());
+
+    useEffect(() => {
+        const listeners = [
+            bleManagerEmitter.addListener(
+                'BleManagerDidUpdateValueForCharacteristic',
+                handleUpdateValueForCharacteristic,
+            ),
+        ];
+
+        return () => {
+            console.debug('[app] main component unmounting. Removing listeners...');
+            for (const listener of listeners) {
+                listener.remove();
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    let buffer = new ArrayBuffer(40);
+    // Writing to the buffer using uint8's because that's what we receive from
+    // data.value below in handleUpdateValueForCharacteristic
+    let uint8_view = new Uint8Array(buffer);
+
+    // Reading from the buffer, we want to see the int16 and float values that 
+    // we sent from the arduino
+    let int16_view = new Int16Array(buffer, 0, 6);
+    let float_view = new Float32Array(buffer, 12, 5);
+
+    let buffer_idx = 0;
+    let buffer_state = 0;
+    let offset = 0;
+    const handleUpdateValueForCharacteristic = (
+        data: BleManagerDidUpdateValueForCharacteristicEvent,
+    ) => {
+        // The data doesn't necessarily come all in one packet, so we have to
+        // manage this buffer filling up ourselves
+        switch (buffer_state) {
+            case 0:
+                if (data.value[0] != 0x12) {
+                    break;
+                }
+                buffer_state = 1;
+                if (data.length == 1) {
+                    break;
+                }
+                buffer_idx = 1;
+                offset = 1;
+            case 1:
+                if (data.value[buffer_idx] != 0x34) {
+                    buffer_idx = 0;
+                    break;
+                }
+                buffer_state = 2;
+                if (data.length - buffer_idx <= 0) {
+                    break;
+                }
+                offset += buffer_idx;
+                buffer_idx = 0;
+            case 2:
+                for (let i = offset; i < data.value.length; i++) {
+                    uint8_view[buffer_idx + i - offset] = data.value[i];
+                }
+                if (buffer_idx + data.value.length - offset >= 40) {
+                    tmp_data = Array.from(int16_view).concat(Array.from(float_view));
+                    for (let i = 0; i < tmp_data.length; i++) {
+                        tmp_data[i] = tmp_data[i].toFixed(2);
+                    }
+                    setData(tmp_data);
+                    console.log("Received data: " + tmp_data);
+                    buffer_idx = 0;
+                    buffer_state = 0;
+                } else {
+                    buffer_idx += data.value.length - offset;
+                }
+                offset = 0;
+        }
+    };
+
+
     return (
-        <View>
-            <Text>Record Data</Text>
+        <View style={{alignItems: 'center'}}>
+            <Text style={{color: '#000000'}}>
+                {data.toString()}
+            </Text>
         </View>
     )
 }

@@ -39,14 +39,6 @@ export default function ConnectDeviceScreen(props) {
                 handleDiscoverPeripheral,
             ),
             bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan),
-        // bleManagerEmitter.addListener(
-        //     'BleManagerDisconnectPeripheral',
-        //     handleDisconnectedPeripheral,
-        // ),
-            bleManagerEmitter.addListener(
-                'BleManagerDidUpdateValueForCharacteristic',
-                handleUpdateValueForCharacteristic,
-            ),
         ];
 
         handleAndroidPermissions();
@@ -86,61 +78,6 @@ export default function ConnectDeviceScreen(props) {
         console.debug(peripherals.length);
     };
     
-    let buffer = new ArrayBuffer(24);
-    // Writing to the buffer using uint8's because that's what we receive from
-    // data.value below in handleUpdateValueForCharacteristic
-    let uint8_view = new Uint8Array(buffer);
-    
-    // Reading from the buffer, we want to see the int16 and float values that 
-    // we sent from the arduino
-    let int16_view = new Int16Array(buffer, 0, 6);
-    let float_view = new Float32Array(buffer, 12, 3);
-    
-    let buffer_idx = 0;
-    let buffer_state = 0;
-    let offset = 0;
-    const handleUpdateValueForCharacteristic = (
-        data: BleManagerDidUpdateValueForCharacteristicEvent,
-    ) => {
-        // The data doesn't necessarily come all in one packet, so we have to
-        // manage this buffer filling up ourselves
-        switch (buffer_state) {
-            case 0:
-                if (data.value[0] != 0x12) {
-                    break;
-                }
-                buffer_state = 1;
-                if (data.length == 1) {
-                    break;
-                }
-                buffer_idx = 1;
-                offset = 1;
-            case 1:
-                if (data.value[buffer_idx] != 0x34) {
-                    buffer_idx = 0;
-                    break;
-                }
-                buffer_state = 2;
-                if (data.length - buffer_idx <= 0) {
-                    break;
-                }
-                offset += buffer_idx;
-                buffer_idx = 0;
-            case 2:
-                for (let i = offset; i < data.value.length; i++) {
-                    uint8_view[buffer_idx + i - offset] = data.value[i];
-                }
-                if (buffer_idx + data.value.length - offset >= 24) {
-                    console.log("Revieved data: " + int16_view + "," + float_view);
-                    buffer_idx = 0;
-                    buffer_state = 0;
-                } else {
-                    buffer_idx += data.value.length - offset;
-                }
-                offset = 0;
-        }
-    };
-
     const handleDiscoverPeripheral = (peripheral: Peripheral) => {
         console.debug('[handleDiscoverPeripheral] new BLE peripheral=', peripheral);
         if (peripheral.name) {
@@ -209,6 +146,8 @@ export default function ConnectDeviceScreen(props) {
                 if (p) {
                     addOrUpdatePeripheral(peripheral.id, {...peripheral, rssi});
                 }
+
+                props.navigation.navigate("Record Data", {connection_id: peripheral.id});
             }
         } catch (error) {
         console.error(
