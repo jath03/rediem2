@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Text, View, NativeModules, NativeEventEmitter } from 'react-native'
-
+import { Text, View, TouchableOpacity, NativeModules, NativeEventEmitter } from 'react-native'
+import styles from './styles';
 import BleManager, {
   BleDisconnectPeripheralEvent,
   BleManagerDidUpdateValueForCharacteristicEvent,
@@ -14,7 +14,9 @@ const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 export default function RecordDataScreen(props) {
-    const [data, setData] = useState(new Array());
+    const [currentData, setCurrentData] = useState(new Array());
+    const [recording, setRecording] = useState(false);
+    let recordedData = [];
 
     useEffect(() => {
         const listeners = [
@@ -33,7 +35,18 @@ export default function RecordDataScreen(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    let buffer = new ArrayBuffer(40);
+    const toggleRecording = () => {
+        if (!recording) {
+            recordedData = [];
+        }
+        setRecording(!recording);
+    };
+
+    const exportData = () => {
+        
+    };
+
+    let buffer = new ArrayBuffer(32);
     // Writing to the buffer using uint8's because that's what we receive from
     // data.value below in handleUpdateValueForCharacteristic
     let uint8_view = new Uint8Array(buffer);
@@ -77,12 +90,16 @@ export default function RecordDataScreen(props) {
                 for (let i = offset; i < data.value.length; i++) {
                     uint8_view[buffer_idx + i - offset] = data.value[i];
                 }
-                if (buffer_idx + data.value.length - offset >= 40) {
+                if (buffer_idx + data.value.length - offset >= 32) {
+                    console.debug(uint8_view);
                     tmp_data = Array.from(int16_view).concat(Array.from(float_view));
                     for (let i = 0; i < tmp_data.length; i++) {
                         tmp_data[i] = tmp_data[i].toFixed(2);
                     }
-                    setData(tmp_data);
+                    setCurrentData(tmp_data);
+                    if (recording) {
+                        recordedData.push(tmp_data);
+                    }
                     console.log("Received data: " + tmp_data);
                     buffer_idx = 0;
                     buffer_state = 0;
@@ -95,10 +112,31 @@ export default function RecordDataScreen(props) {
 
 
     return (
-        <View style={{alignItems: 'center'}}>
-            <Text style={{color: '#000000'}}>
-                {data.toString()}
-            </Text>
+        <View style={styles.container}>
+            <View style={{flexDirection: 'row'}}>
+                <TouchableOpacity style={styles.button} onPress={toggleRecording}>
+                    <Text style={styles.buttonTitle}>
+                        {recording ? "Stop" : "Start"} Recording
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={exportData}
+                    disabled={recordedData.length == 0 || recording}
+                >
+                    <Text style={styles.buttonTitle}>
+                        Export Data
+                    </Text>
+                </TouchableOpacity>
+            </View>
+            <View style={{alignItems: 'center'}}>
+                <Text style={{color: '#000000'}}>
+                    Live Data:
+                </Text>
+                <Text style={{color: '#000000'}}>
+                    {currentData.toString()}
+                </Text>
+            </View>
         </View>
     )
 }
