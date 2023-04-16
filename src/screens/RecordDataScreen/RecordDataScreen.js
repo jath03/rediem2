@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Text, View, TouchableOpacity, NativeModules, NativeEventEmitter } from 'react-native'
+import { jsonToCSV } from 'react-native-csv';
+import Share from 'react-native-share';
 import styles from './styles';
 import BleManager, {
   BleDisconnectPeripheralEvent,
@@ -16,7 +18,7 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 export default function RecordDataScreen(props) {
     const [currentData, setCurrentData] = useState(new Array());
     const [recording, setRecording] = useState(false);
-    let recordedData = [];
+    let recordedData = useRef([]);
 
     useEffect(() => {
         const listeners = [
@@ -33,17 +35,38 @@ export default function RecordDataScreen(props) {
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [recording]);
 
     const toggleRecording = () => {
         if (!recording) {
-            recordedData = [];
+            console.debug("Starting recording");
+            recordedData.current = [];
+        } else {
+            console.debug("Stopping recording");
+            console.debug("# of entries recorded: " + recordedData.current.length);
         }
-        setRecording(!recording);
+        setRecording(recording => !recording);
     };
 
-    const exportData = () => {
+    const exportData = async () => {
+        let data_str = jsonToCSV({
+            fields: ["R1", "R2", "R3", "R4", "R5", "R6", "X", "Y", "Z", "EMG", "BIOZ"],
+            data: recordedData.current
+        });
+        const prefix = 'data:text/csv;base64,';
+        const data = prefix + btoa(data_str);
         
+        try {
+            await Share.open({
+                title: 'Share CSV',
+                url: data,
+                saveToFiles: true,
+                failOnCancel: false,
+                type: 'text/csv'
+            });
+        } catch (error) {
+            console.log('Error =>', error);
+        }
     };
 
     let buffer = new ArrayBuffer(32);
@@ -91,14 +114,13 @@ export default function RecordDataScreen(props) {
                     uint8_view[buffer_idx + i - offset] = data.value[i];
                 }
                 if (buffer_idx + data.value.length - offset >= 32) {
-                    console.debug(uint8_view);
                     tmp_data = Array.from(int16_view).concat(Array.from(float_view));
                     for (let i = 0; i < tmp_data.length; i++) {
                         tmp_data[i] = tmp_data[i].toFixed(2);
                     }
                     setCurrentData(tmp_data);
                     if (recording) {
-                        recordedData.push(tmp_data);
+                        recordedData.current.push(tmp_data);
                     }
                     console.log("Received data: " + tmp_data);
                     buffer_idx = 0;
