@@ -17,7 +17,52 @@ import BleManager, {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-const FIELDS = ["R1", "R2", "R3", "R4", "R5", "R6", "X", "Y", "Z", "EMG", "BIOZ"];
+const FIELDS = {
+    "R1": {
+        name: "Resistor 1 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "R2": {
+        name: "Resistor 2 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "R3": {
+        name: "Resistor 3 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "R4": {
+        name: "Resistor 4 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "R5": {
+        name: "Resistor 5 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "R6": {
+        name: "Resistor 6 (Ω)",
+        bounds: {min: 10_000, max: 30_000}
+    },
+    "X": {
+        name: "Accelerometer X (g)",
+        bounds: {min: -2, max: 2}
+    },
+    "Y": {
+        name: "Accelerometer Y (g)",
+        bounds: {min: -2, max: 2}
+    },
+    "Z": {
+        name: "Accelerometer Z (g)",
+        bounds: {min: -2, max: 2}
+    },
+    "EMG": {
+        name: "EMG (mV)",
+        bounds: {min: 240, max: 255}
+    },
+    "BIOZ": {
+        name: "BioZ (kΩ)",
+        bounds: {min: -5, max: 5}
+    }
+};
 // const FIELD_NAMES = [""]
 
 export default function RecordDataScreen(props) {
@@ -57,7 +102,7 @@ export default function RecordDataScreen(props) {
 
     const exportData = async () => {
         let data_str = jsonToCSV({
-            fields: FIELDS,
+            fields: Object.keys(FIELDS),
             data: recordedData.current
         });
         const prefix = 'data:text/csv;base64,';
@@ -94,7 +139,6 @@ export default function RecordDataScreen(props) {
     ) => {
         // The data doesn't necessarily come all in one packet, so we have to
         // manage this buffer filling up ourselves
-        console.debug(data.value);
         switch (buffer_state) {
             case 0:
                 if (data.value[0] != 0x12) {
@@ -133,7 +177,6 @@ export default function RecordDataScreen(props) {
                             return recdata;
                         });
                     }
-                    console.log("Received data: " + tmp_data);
                     buffer_idx = 0;
                     buffer_state = 0;
                 } else {
@@ -161,44 +204,33 @@ export default function RecordDataScreen(props) {
     };
 
     const GraphItem = ({item, index}) => {
-        // console.debug("Graphing item " + item);
-        // console.debug(item);
+        const vals = Object.values(FIELDS);
         return (
             <View>
-                <Text style={{color: '#000000'}}>{FIELDS[index]}</Text>
+                <Text style={{color: '#000000'}}>{vals[index].name}</Text>
                 <Chart
                     disableGestures
                     data={item}
                     style={{height: 200, width: 300}}
-                    yDomain={{ min: 0, max: 10}}
+                    padding={{left: 45, right: 10, top: 10, bottom: 10}}
+                    yDomain={vals[index].bounds}
                 >
-                    <VerticalAxis />
+                    <VerticalAxis
+                        tickCount={5}
+                        theme={{ labels: { formatter: (v) => v.toFixed(2) } }}
+                    />
                     <HorizontalAxis />
                     <Line />
-                    <Area />
                 </Chart>
             </View>
         );
-        // return (
-        //   <Text>{item.toString()}</Text>  
-        // );
     };
-
-    // const graphs = (data) => {
-    //     let graphItems = [];
-    //     data = transpose(data);
-    //     for (variable in data) {
-    //         graphItems.push(
-    //             <FlatList
-    //         );
-    //     }
-    // };
 
     return (
         <View style={styles.container}>
             <View style={{flexDirection: 'row'}}>
                 <TouchableOpacity style={styles.button} onPress={toggleRecording}>
-                    <Text style={styles.buttonTitle}>
+                    <Text style={styles.buttonText}>
                         {recording ? "Stop" : "Start"} Recording
                     </Text>
                 </TouchableOpacity>
@@ -207,7 +239,7 @@ export default function RecordDataScreen(props) {
                     onPress={exportData}
                     disabled={recordedData.length == 0 || recording}
                 >
-                    <Text style={styles.buttonTitle}>
+                    <Text style={styles.buttonText}>
                         Export Data
                     </Text>
                 </TouchableOpacity>

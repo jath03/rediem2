@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { LoginScreen, HomeScreen, RegistrationScreen, SettingsScreen, RecordDataScreen, ConnectDeviceScreen, ViewExportDataScreen,HelpScreen,ResetPassword,AddPrimaryCareScreen} from './src/screens'
+import { LoginScreen, HomeScreen, RegistrationScreen, SettingsScreen, RecordDataScreen, ConnectDeviceScreen,HelpScreen,ResetPassword,AddPrimaryCareScreen} from './src/screens'
 import {decode, encode} from 'base-64'
 import { firebase } from './src/firebase/config'
 if (!global.btoa) {  global.btoa = encode }
@@ -54,9 +54,6 @@ export default function App() {
           <Stack.Screen name="Connect Your Device">
             {props => <ConnectDeviceScreen {...props} extraData={user} />}
           </Stack.Screen>
-          <Stack.Screen name="Stored Data">
-            {props => <ViewExportDataScreen {...props} extraData={user} />}
-          </Stack.Screen>
         </>
         ) : (
           <>
@@ -66,7 +63,6 @@ export default function App() {
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Record Data" component={RecordDataScreen} />
             <Stack.Screen name="Connect Your Device" component={ConnectDeviceScreen} />
-            <Stack.Screen name="Stored Data" component={ViewExportDataScreen} />
             <Stack.Screen name="Help Screen" component={HelpScreen} />
             <Stack.Screen name="Reset Password" component={ResetPassword} />
             <Stack.Screen name="Add Primary Care Physician" component={AddPrimaryCareScreen} />

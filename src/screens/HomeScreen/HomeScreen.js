@@ -17,10 +17,6 @@ export default function HomeScreen({navigation}) {
         navigation.navigate('Connect Your Device')
     }
 
-    const onViewExportDataPress = () => {
-        navigation.navigate('Stored Data')
-    }
-
     const Separator = () => <View style={styles.separator} />;
 
     return (
@@ -48,19 +44,15 @@ export default function HomeScreen({navigation}) {
 
 
          <TouchableOpacity style={styles.button} onPress={() => onRecordDataLinkPress()}>
-                    <Text style={styles.buttonTitle}>Record Data</Text>
+                    <Text style={styles.buttonText}>Record Data</Text>
          </TouchableOpacity>
          <Separator />
          <TouchableOpacity style={styles.button} onPress={() => onConnectDeviceLinkPress()}>
-                    <Text style={styles.buttonTitle}>Connect your Device</Text>
+                    <Text style={styles.buttonText}>Connect your Device</Text>
          </TouchableOpacity>
          <Separator />
          <TouchableOpacity style={styles.buttonSettings} onPress={() => onSettingsLinkPress()}>
-                    <Text style={styles.buttonTitle}>Settings</Text>
-         </TouchableOpacity>
-            <Separator />
-         <TouchableOpacity style={styles.button} onPress={() => onViewExportDataPress()}>
-                    <Text style={styles.buttonTitle}>View/Export Data</Text>
+                    <Text style={styles.buttonText}>Settings</Text>
          </TouchableOpacity>
 
        

@@ -51,7 +51,8 @@ export default StyleSheet.create({
     },
     buttonText: {
         color: 'white',
-        fontSize: 16
+        fontSize: 16,
+        fontWeight: "bold"
     },
     listContainer: {
         marginTop: 20,

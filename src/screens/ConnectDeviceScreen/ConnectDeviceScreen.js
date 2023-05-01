@@ -209,7 +209,7 @@ export default function ConnectDeviceScreen(props) {
 
     const PeripheralItem = ({item}) => (
         <TouchableOpacity style={styles.device} onPress={() => connectPeripheral(item)}>
-            <Text style={styles.buttonTitle}>
+            <Text style={styles.buttonText}>
                 {item.name}
                 {item.connecting && ' - Connecting...'}
             </Text>
@@ -221,7 +221,7 @@ export default function ConnectDeviceScreen(props) {
             <Separator />
             <View style={{flexDirection: 'row'}}>
             <TouchableOpacity style={styles.button} onPress={startScan}>
-                <Text style={styles.buttonTitle}>Scan for Devices</Text>
+                <Text style={styles.buttonText}>Scan for Devices</Text>
             </TouchableOpacity>
 
             <ActivityIndicator animating={isScanning} />
