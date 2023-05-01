@@ -11,3 +11,9 @@ export { default as RecordDataScreen } from './RecordDataScreen/RecordDataScreen
 export { default as ConnectDeviceScreen } from './ConnectDeviceScreen/ConnectDeviceScreen'
 
 export { default as ViewExportDataScreen } from './ViewExportDataScreen/ViewExportDataScreen'
+
+export { default as HelpScreen } from './HelpScreen/HelpScreen'
+
+export { default as ResetPassword } from './ResetPassword/ResetPassword'
+
+export {default as AddPrimaryCareScreen} from './AddPrimaryCareScreen/AddPrimaryCareScreen'

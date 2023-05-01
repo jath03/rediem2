@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import styles from './styles';
-import { firebase } from './../../firebase/config.js'
+import { db, firebase } from './../../firebase/config.js'
+import { doc, setDoc, onSnapshot, collection } from "firebase/firestore";
 
-export default function RegistrationScreen({navigation}) {
+
+export default function RegistrationScreen({ navigation }) {
     const [fullName, setFullName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -20,30 +22,28 @@ export default function RegistrationScreen({navigation}) {
             return
         }
         firebase
-        .auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then((response) => {
-            const uid = response.user.uid
-            const data = {
-                id: uid,
-                email,
-                fullName,
-            };
-            const usersRef = firebase.firestore().collection('users')
-            usersRef
-                .doc(uid)
-                .set(data)
-                .then(() => {
-                    navigation.navigate('Home', {user: data})
-                })
-                .catch((error) => {
-                    alert(error)
-                });
-        })
-        .catch((error) => {
-            alert(error)
-    });
-}
+            .auth()
+            .createUserWithEmailAndPassword(email, password)
+            .then((response) => {
+                const uid = response.user.uid
+                const path = doc(db, "users", uid);
+                const data = {
+                    id: uid,
+                    email,
+                    fullName,
+                };
+                setDoc(path, data)
+                    .then(() => {
+                        navigation.navigate('Home', { user: data })
+                    })
+                    .catch((err) => {
+                        alert(err)
+                    });
+            })
+            .catch((error) => {
+                alert(error)
+            });
+    }
     return (
         <View style={styles.container}>
             <KeyboardAwareScrollView
